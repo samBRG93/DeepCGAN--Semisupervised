@@ -1,0 +1,35 @@
+  # Calculate seperate losses for discriminator with real and fake images
+
+  real_discriminator_loss = tf.losses.sigmoid_cross_entropy(
+
+      tf.constant(1, shape=[BATCH_SIZE]),
+
+      real_discriminator,
+
+      scope='real_discriminator_loss')
+
+  fake_discriminator_loss = tf.losses.sigmoid_cross_entropy(
+
+      tf.constant(0, shape=[BATCH_SIZE]),
+
+      fake_discriminator,
+
+      scope='fake_discriminator_loss')
+
+
+
+  # Add discriminator losses
+
+  discriminator_loss = real_discriminator_loss + fake_discriminator_loss
+
+
+
+  # Calculate loss for generator by flipping label on discriminator output
+
+  generator_loss = tf.losses.sigmoid_cross_entropy(
+
+      tf.constant(1, shape=[BATCH_SIZE]),
+
+      fake_discriminator,
+
+      scope='generator_loss')
