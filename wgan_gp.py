@@ -15,15 +15,20 @@ image_shape = (64, 64, 3)
 import euro_sat_archive
 from euro_sat_archive import load_batch
 
+
 # ==========================
 #      Utility Funzioni
 # ==========================
 
 def preprocess(x): return 2. * x - 1.
+
+
 def deprocess(x): return (x + 1.) / 2.
+
 
 def sample_noise(batch_size, dim):
     return tf.random.uniform([batch_size, dim], minval=-1.0, maxval=1.0)
+
 
 def disp_images(images, n=16):
     images = images[:n]
@@ -37,13 +42,14 @@ def disp_images(images, n=16):
     plt.tight_layout()
     plt.show()
 
+
 # ==========================
 #       Generator
 # ==========================
 
 def build_generator(noise_dim):
     model = models.Sequential(name='Generator')
-    model.add(layers.Dense(4*4*256, input_dim=noise_dim))
+    model.add(layers.Dense(4 * 4 * 256, input_dim=noise_dim))
     model.add(layers.Reshape((4, 4, 256)))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU(0.2))
@@ -59,6 +65,7 @@ def build_generator(noise_dim):
     model.add(layers.Conv2DTranspose(3, kernel_size=5, strides=2, padding='same', activation='tanh'))
 
     return model
+
 
 # ==========================
 #     Discriminator
@@ -79,19 +86,23 @@ def build_discriminator():
 
     return model
 
+
 # ==========================
 #         Loss
 # ==========================
 
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
+
 def discriminator_loss(real_output, fake_output):
     real_loss = cross_entropy(tf.ones_like(real_output), real_output)
     fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
     return real_loss + fake_loss
 
+
 def generator_loss(fake_output):
     return cross_entropy(tf.ones_like(fake_output), fake_output)
+
 
 # ==========================
 #     Training Step
@@ -117,6 +128,7 @@ def train_step(generator, discriminator, images, generator_optimizer, discrimina
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
     return gen_loss, disc_loss
+
 
 # ==========================
 #     Main Esecuzione

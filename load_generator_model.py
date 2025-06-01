@@ -9,6 +9,14 @@ mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 labels = mnist.test.labels[:1000, :]
 
 sess = tf.Session()
+# Placeholders
+z_dim = 96
+y_dim = 10
+z = tf.placeholder(tf.float32, shape=[None, z_dim], name='noise')
+y = tf.placeholder(tf.float32, shape=[None, y_dim], name='labels')
+
+# Build generator graph
+G_sample = generator_conv(z, y, reuse=False)
 
 
 def activation(x, alpha=0.01):
@@ -56,16 +64,6 @@ def generator_conv(z, c, reuse=False):
         x = tf.tanh(x)
         x = tf.reshape(x, shape=[-1, 784])
         return x
-
-
-# Placeholders
-z_dim = 96
-y_dim = 10
-z = tf.placeholder(tf.float32, shape=[None, z_dim], name='noise')
-y = tf.placeholder(tf.float32, shape=[None, y_dim], name='labels')
-
-# Build generator graph
-G_sample = generator_conv(z, y, reuse=False)
 
 
 def save_generator(sess, path='my_generator_model.ckpt'):

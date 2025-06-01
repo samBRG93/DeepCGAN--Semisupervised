@@ -1,3 +1,4 @@
+import numpy
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -79,21 +80,15 @@ def generator_conv(z, y, reuse=True):
         return x
 
 
-def generate_fake_images(generator_output, y_placeholder, z_placeholder, labels, n_samples, first_time=True):
+def generate_fake_images(generator_output, y_placeholder, z_placeholder, labels, n_samples):
     """
     Genera immagini false utilizzando il generatore.
     Se è la prima volta può servire per caricare modelli pre-addestrati.
     """
-    if first_time:
-        print("Prima generazione di immagini fake")
-        # Caricamento modello o altre inizializzazioni se necessarie
-        # Load_generator() # decommenta se implementata
-
-    labels = labels[:n_samples]
     noise_batch = sess.run(sample_noise(n_samples, z_placeholder.shape[1].value or 96))  # fallback 96
-
-    generated_imgs = sess.run(generator_output, feed_dict={y_placeholder: labels, z_placeholder: noise_batch})
-    return generated_imgs
+    generated_images = sess.run(generator_output,
+                                feed_dict={y_placeholder: labels[:n_samples], z_placeholder: noise_batch})
+    return generated_images
 
 
 def save_generator(vars_to_save):
@@ -112,20 +107,21 @@ def load_generator():
 def display_images(images):
     """Visualizza immagini in una griglia quadrata."""
     images = np.reshape(images, [images.shape[0], -1])
-    n_imgs = images.shape[0]
-    img_side = int(np.sqrt(images.shape[1]))
-    grid_dim = int(np.ceil(np.sqrt(n_imgs)))
+    image_number = images.shape[0]
+    image_side = int(np.sqrt(images.shape[1]))
+    grid_dim = int(np.ceil(np.sqrt(image_number)))
 
     fig = plt.figure(figsize=(grid_dim, grid_dim))
     gs = gridspec.GridSpec(grid_dim, grid_dim)
     gs.update(wspace=0.05, hspace=0.05)
 
-    for i, img in enumerate(images):
+    for i, image in enumerate(images):
         ax = plt.subplot(gs[i])
         plt.axis('off')
         ax.set_aspect('equal')
-        plt.imshow(img.reshape([img_side, img_side]))
+        plt.imshow(image.squeeze())
     plt.show()
+
 
 if __name__ == '__main__':
     # --- Esempio di uso ---
@@ -133,12 +129,12 @@ if __name__ == '__main__':
     z_ph, y_ph = define_placeholders(noise_dim=96, label_dim=10)
 
     # Costruisci grafo generatore
-    G_sample = generator_conv(z_ph, y_ph, reuse=False)
+    generated_sample = generator_conv(z_ph, y_ph, reuse=False)
 
     # Genera immagini fake (primo batch)
-    fake_images = generate_fake_images(G_sample, y_ph, z_ph, labels, n_samples=128, first_time=True)
+    fake_images = generate_fake_images(generated_sample, y_ph, z_ph, labels, n_samples=128)
 
-    print("Shape delle immagini generate:", fake_images.shape)
+    print("Fake images shape:", fake_images.shape)
 
     # Visualizza prime 25 immagini generate (adatta se vuoi)
-    # display_images(fake_images[:25])
+    display_images(fake_images[:25])
